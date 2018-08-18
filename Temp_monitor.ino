@@ -3,7 +3,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <DHT.h>
 
-#define DHTPIN 2 // what digital pin we're connected to
+#define DHTPIN 12 // what digital pin we're connected to
 #define DHTTYPE DHT22 // DHT 22  (AM2302), AM2321
 
 DHT dht(DHTPIN, DHTTYPE);
@@ -18,6 +18,10 @@ float avHumHour;
 float avTempMin;
 float avHumMin;
 
+const int buttonPin=2;
+int buttonPushCounter=0;
+int buttonState=0;
+int lastButtonState=0;
 
 // make some custom characters:
 byte zero[8] = {
@@ -112,7 +116,9 @@ byte seven[8] = {
 void setup()
 {
   Serial.begin(9600);
-
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(buttonPin, INPUT);
+  
   lcd.init();                      // initialize the lcd 
 
   // create a new character
@@ -206,6 +212,30 @@ void loop()
       else if (Hum <=19.9 && Hum>=0)
         lcd.write(byte(0));
        delay(3000);
+       buttonState=digitalRead(buttonPin);
+
+ if (buttonState!=lastButtonState)
+ {
+    if (buttonState==HIGH)
+    {
+      buttonPushCounter++;
+    }
+
+    delay(50);
+ }
+
+lastButtonState=buttonState;
+
+ if(buttonPushCounter%2==0)
+ {
+     lcd.setBacklight(50);
+    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+ }
+ else
+ {
+     lcd.setBacklight(0);
+    digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+ }
     }
     lcd.clear();
     avTempMin=avTempMin/20;
